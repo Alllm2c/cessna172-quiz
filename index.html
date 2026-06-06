@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cessna 172 — Викторина</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0e1a;
+      color: #e0e8ff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 720px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: #7eb8ff;
+    }
+
+    header .subtitle {
+      color: #8899bb;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #131929;
+      border: 1px solid #1e2d4a;
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: #1e2d4a;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3a7bd5, #7eb8ff);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #556688;
+      margin-bottom: 16px;
+    }
+
+    .difficulty {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    .difficulty.easy   { background: #1a3a1a; color: #5dcc5d; }
+    .difficulty.medium { background: #3a2a0a; color: #f0a830; }
+    .difficulty.hard   { background: #3a0a0a; color: #ff6060; }
+
+    .question-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      color: #cdd8f0;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background: #0d1525;
+      border: 1.5px solid #1e2d4a;
+      border-radius: 10px;
+      padding: 14px 20px;
+      color: #c0cce8;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: #3a7bd5;
+      background: #0f1e35;
+      color: #e0ecff;
+    }
+
+    .option-btn.correct {
+      border-color: #4caf50;
+      background: #0d2610;
+      color: #7ddd80;
+    }
+
+    .option-btn.wrong {
+      border-color: #e53935;
+      background: #2a0c0c;
+      color: #ff8080;
+    }
+
+    .option-btn:disabled { cursor: default; }
+
+    .explanation {
+      margin-top: 20px;
+      padding: 16px;
+      background: #0d1828;
+      border-left: 3px solid #3a7bd5;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      color: #99aacc;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .next-btn {
+      margin-top: 24px;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1e4fa0, #3a7bd5);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      transition: opacity 0.2s;
+    }
+
+    .next-btn:hover { opacity: 0.88; }
+
+    /* Results */
+    .results { text-align: center; }
+
+    .results .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid #3a7bd5;
+      background: #0d1525;
+    }
+
+    .results .score-circle .score-num {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #7eb8ff;
+    }
+
+    .results .score-circle .score-total {
+      font-size: 0.9rem;
+      color: #556688;
+    }
+
+    .results h2 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      color: #c8d8ff;
+    }
+
+    .results p {
+      color: #778899;
+      margin-bottom: 28px;
+    }
+
+    .restart-btn {
+      padding: 14px 40px;
+      background: linear-gradient(135deg, #1e4fa0, #3a7bd5);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .restart-btn:hover { opacity: 0.88; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Start screen */
+    .start-screen { text-align: center; }
+    .start-screen p { color: #778899; margin-bottom: 28px; line-height: 1.7; }
+    .start-btn {
+      padding: 14px 48px;
+      background: linear-gradient(135deg, #1e4fa0, #3a7bd5);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .start-btn:hover { opacity: 0.88; }
+
+    .plane-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>✈ CESSNA 172</h1>
+    <div class="subtitle">Викторина для пилотов и авиалюбителей</div>
+  </header>
+
+  <div class="card">
+    <!-- Start -->
+    <div id="startScreen" class="screen active start-screen">
+      <div class="plane-icon">🛩️</div>
+      <h2 style="margin-bottom:12px;color:#7eb8ff">Готов к взлёту?</h2>
+      <p>
+        20 вопросов об одном из самых популярных самолётов в мире.<br>
+        Характеристики, системы, ограничения, процедуры — всё вперемешку.<br>
+        На каждый вопрос 4 варианта ответа.
+      </p>
+      <button class="start-btn" onclick="startQuiz()">НАЧАТЬ ВИКТОРИНУ</button>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quizScreen" class="screen">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="question-meta">
+        <span id="questionNum">Вопрос 1 / 20</span>
+        <span class="difficulty" id="diffBadge">Лёгкий</span>
+      </div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="explanation" id="explanation"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Следующий вопрос →</button>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsScreen" class="screen results">
+      <div class="score-circle">
+        <div class="score-num" id="finalScore">0</div>
+        <div class="score-total" id="finalTotal">из 20</div>
+      </div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultMsg"></p>
+      <button class="restart-btn" onclick="restartQuiz()">Пройти ещё раз</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  // === ЛЁГКИЕ ===
+  {
+    q: "Сколько мест в Cessna 172?",
+    opts: ["2", "4", "6", "3"],
+    answer: 1,
+    diff: "easy",
+    explain: "Cessna 172 — четырёхместный одномоторный самолёт: два передних и два задних места."
+  },
+  {
+    q: "Какой двигатель установлен на большинстве современных Cessna 172S?",
+    opts: ["Continental O-300", "Lycoming IO-360-L2A", "Pratt & Whitney R-985", "Rotax 912"],
+    answer: 1,
+    diff: "easy",
+    explain: "172S (Skyhawk SP) оснащён двигателем Lycoming IO-360-L2A мощностью 180 л.с. с прямым впрыском топлива."
+  },
+  {
+    q: "Cessna 172 — самолёт какой конфигурации шасси?",
+    opts: ["Трёхопорное убирающееся", "Трёхопорное неубирающееся (носовая стойка)", "Taildragger (хвостовая стойка)", "Поплавковое"],
+    answer: 1,
+    diff: "easy",
+    explain: "172 имеет фиксированное трёхопорное шасси с носовой стойкой — это упрощает взлёт и посадку."
+  },
+  {
+    q: "Что означает аббревиатура VNE?",
+    opts: ["Скорость нормального набора высоты", "Скорость, которую нельзя превышать (Never Exceed Speed)", "Скорость с выпущенными закрылками", "Скорость маневрирования"],
+    answer: 1,
+    diff: "easy",
+    explain: "VNE (Never Exceed Speed) — красная черта на указателе скорости. Для C172S — 163 узла (302 км/ч)."
+  },
+  {
+    q: "Какого цвета маркировка нормального рабочего диапазона на указателе воздушной скорости?",
+    opts: ["Жёлтая", "Красная", "Зелёная", "Белая"],
+    answer: 2,
+    diff: "easy",
+    explain: "Зелёная дуга — нормальный рабочий диапазон (Vso–Vno). Белая — диапазон с закрылками, жёлтая — осторожность, красная черта — VNE."
+  },
+  {
+    q: "Как называется скорость сваливания с выпущенными закрылками и шасси?",
+    opts: ["VNO", "VA", "VSO", "VFE"],
+    answer: 2,
+    diff: "easy",
+    explain: "VSO — скорость сваливания в посадочной конфигурации. Нижняя граница белой дуги на указателе скорости. Для 172S — 40 узлов."
+  },
+  {
+    q: "Какое топливо использует Cessna 172S?",
+    opts: ["Jet-A", "Avgas 100LL", "Mogas (автомобильный 95)", "Дизельное"],
+    answer: 1,
+    diff: "easy",
+    explain: "Двигатели Cessna 172 работают на авиационном бензине 100LL (низкосвинцовый). Синего цвета."
+  },
+
+  // === СРЕДНИЕ ===
+  {
+    q: "Какова максимальная взлётная масса Cessna 172S?",
+    opts: ["950 кг", "1089 кг", "1200 кг", "1360 кг"],
+    answer: 1,
+    diff: "medium",
+    explain: "MTOW Cessna 172S — 2550 фунтов (≈1089 кг). Это ключевое ограничение для расчёта загрузки."
+  },
+  {
+    q: "Скорость наилучшего угла набора высоты (Vx) для C172S составляет примерно:",
+    opts: ["55 узлов", "62 узла", "74 узла", "85 узлов"],
+    answer: 1,
+    diff: "medium",
+    explain: "Vx = 62 узла — максимальный набор высоты на единицу горизонтального расстояния. Применяется при препятствиях на взлёте."
+  },
+  {
+    q: "Скорость наилучшей скороподъёмности (Vy) для C172S:",
+    opts: ["62 узла", "74 узла", "85 узлов", "90 узлов"],
+    answer: 1,
+    diff: "medium",
+    explain: "Vy = 74 узла — максимальный набор высоты в минуту. Стандартный режим набора при нормальных условиях."
+  },
+  {
+    q: "Какой максимальный угол отклонения закрылков на C172S?",
+    opts: ["20°", "30°", "40°", "50°"],
+    answer: 2,
+    diff: "medium",
+    explain: "Закрылки C172S отклоняются до 40°. Первые 10° дают преимущественно подъёмную силу, далее — торможение."
+  },
+  {
+    q: "Максимальная скорость с выпущенными закрылками (VFE) на C172S:",
+    opts: ["85 узлов", "100 узлов", "110 узлов", "120 узлов"],
+    answer: 0,
+    diff: "medium",
+    explain: "VFE = 85 узлов — верхняя граница белой дуги. Превышение этой скорости с закрылками может вызвать их повреждение."
+  },
+  {
+    q: "Рекомендуемая скорость захода на посадку (Vref) для C172S при MTOW:",
+    opts: ["55 узлов", "61 узел", "65 узлов", "70 узлов"],
+    answer: 1,
+    diff: "medium",
+    explain: "Vref ≈ 61-65 узлов (1.3 Vso). Реальная скорость зависит от массы и конфигурации закрылков."
+  },
+  {
+    q: "Какова нормальная скороподъёмность C172S у земли (на уровне моря, MTOW)?",
+    opts: ["400 фут/мин", "730 фут/мин", "1000 фут/мин", "1200 фут/мин"],
+    answer: 1,
+    diff: "medium",
+    explain: "С двигателем 180 л.с. Cessna 172S набирает примерно 730 фут/мин (≈3,7 м/с) у земли при стандартных условиях."
+  },
+  {
+    q: "Практический потолок Cessna 172S составляет примерно:",
+    opts: ["8 000 футов", "10 000 футов", "14 000 футов", "18 000 футов"],
+    answer: 2,
+    diff: "medium",
+    explain: "Service ceiling C172S — около 14 000 футов (4267 м). Выше мощность двигателя падает, скороподъёмность — менее 100 фут/мин."
+  },
+
+  // === СЛОЖНЫЕ ===
+  {
+    q: "Что такое скорость маневрирования VA и почему важно не превышать её при болтанке?",
+    opts: [
+      "Скорость набора высоты — превышение сжигает лишнее топливо",
+      "Расчётная скорость маневрирования — выше неё полное отклонение рулей может превысить нагрузки на конструкцию",
+      "Минимальная скорость полёта с двигателем — ниже самолёт падает",
+      "Максимальная скорость при отказе двигателя"
+    ],
+    answer: 1,
+    diff: "hard",
+    explain: "VA — скорость, при которой полное отклонение рулей вызовет сваливание раньше, чем нагрузки превысят прочность конструкции. Для C172S VA = 105 узлов при MTOW. При болтанке нельзя делать резкие полные отклонения выше VA."
+  },
+  {
+    q: "Что такое POH и чем он отличается от AFM?",
+    opts: [
+      "POH — руководство пилота, одобренное FAA; AFM — маркетинговый буклет производителя",
+      "POH — Pilot's Operating Handbook, необязательный документ; AFM (Approved Flight Manual) — юридически обязательный, часть лётной годности",
+      "Это одно и то же, разные названия одного документа",
+      "POH — для учебных полётов, AFM — для коммерческих"
+    ],
+    answer: 1,
+    diff: "hard",
+    explain: "AFM (Approved Flight Manual) является обязательным документом на борту и сертифицирован FAA. POH для современных C172 фактически содержит AFM внутри (Section 2 = Limitations), но POH в целом шире и включает необязательные разделы."
+  },
+  {
+    q: "Как работает система топливоснабжения C172 и почему переключатель стоит в положении BOTH при взлёте?",
+    opts: [
+      "BOTH смешивает топливо из баков для лучшей октановой смеси",
+      "При BOTH двигатель питается из обоих баков одновременно, что исключает кренящий момент из-за несимметричной выработки",
+      "Гравитационная система: BOTH открывает оба бака, увеличивая давление топлива к карбюратору",
+      "BOTH активирует резервный топливный насос"
+    ],
+    answer: 2,
+    diff: "hard",
+    explain: "C172 использует гравитационную топливную систему с двумя баками по 26,5 гал. При BOTH самотёком питаются оба бака; это также гарантирует подачу при крене — если один бак временно не подаёт, второй продолжает. На взлёте и посадке — всегда BOTH."
+  },
+  {
+    q: "Что такое карбюраторный лёд (carb ice) и при каких условиях он наиболее вероятен?",
+    opts: [
+      "Лёд на поверхности крыла; образуется при температуре ниже -10°C",
+      "Лёд в диффузоре карбюратора из-за падения температуры при испарении топлива; наиболее вероятен при +25°C и влажности >80%",
+      "Замерзание топлива в баках при ночных полётах зимой",
+      "Обледенение трубки Пито при входе в облака"
+    ],
+    answer: 1,
+    diff: "hard",
+    explain: "В карбюраторе температура падает до 20-25°C ниже OAT из-за эффекта Вентури и испарения топлива. Лёд может образоваться при +30°C снаружи! Признак: необъяснимое снижение об/мин. Лечение: карбюраторный подогрев (CARB HEAT ON)."
+  },
+  {
+    q: "Действия при отказе двигателя сразу после взлёта (ниже 1000 футов AGL)?",
+    opts: [
+      "Немедленно выполнить разворот 180° и зайти на обратный курс полосы",
+      "Снизить тангаж до планирования (Vg ≈ 65 уз), выбрать площадку впереди, краткий секторный маневр не более 30°, без попытки вернуться на полосу",
+      "Максимально обеднить смесь и набрать высоту с Vx",
+      "Включить карбюраторный подогрев, выпустить закрылки 40° и садиться"
+    ],
+    answer: 1,
+    diff: "hard",
+    explain: "\"Невозможный разворот\" ниже 1000 футов убивает. При отказе двигателя у земли единственное правило: лети прямо вперёд, выбирай площадку в секторе ±30°, планируй. Попытка вернуться на полосу на малой высоте — главная причина смертельных аварий при учебных полётах."
+  }
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function startQuiz() {
+  questions = shuffle(ALL_QUESTIONS).slice(0, 20);
+  current = 0;
+  score = 0;
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  document.getElementById('questionNum').textContent = `Вопрос ${current + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${(current / questions.length) * 100}%`;
+
+  const badge = document.getElementById('diffBadge');
+  const labels = { easy: 'Лёгкий', medium: 'Средний', hard: 'Сложный' };
+  badge.textContent = labels[q.diff];
+  badge.className = 'difficulty ' + q.diff;
+
+  document.getElementById('questionText').textContent = q.q;
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('explanation').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const btns = document.querySelectorAll('.option-btn');
+
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === idx) btn.classList.add('wrong');
+  });
+
+  if (idx === q.answer) score++;
+
+  const expl = document.getElementById('explanation');
+  expl.textContent = q.explain;
+  expl.style.display = 'block';
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = current + 1 < questions.length ? 'Следующий вопрос →' : 'Посмотреть результат';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  showScreen('resultsScreen');
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalTotal').textContent = `из ${questions.length}`;
+
+  const pct = score / questions.length;
+  let title, msg;
+  if (pct >= 0.9) {
+    title = '🏆 Отличный результат!';
+    msg = 'Ты знаешь C172 как свои пять пальцев. CFI одобряет.';
+  } else if (pct >= 0.7) {
+    title = '✈️ Хороший пилот!';
+    msg = 'Крепкая база. Повтори POH по слабым местам — и ты идеален.';
+  } else if (pct >= 0.5) {
+    title = '📚 Есть над чем работать';
+    msg = 'Основы есть, но некоторые системы надо подтянуть. Открой POH!';
+  } else {
+    title = '🔧 Время учиться';
+    msg = 'Не расстраивайся — пройди ещё раз и заглядывай в POH после каждого вопроса.';
+  }
+
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+function restartQuiz() {
+  showScreen('startScreen');
+}
+</script>
+</body>
+</html>
